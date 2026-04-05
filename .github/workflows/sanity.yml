@@ -1,0 +1,28 @@
+name: Sanity Check
+
+on:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  sanity-check:
+    if: github.repository_owner != 'unlu-sd2026'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: pip install pytest requests pyyaml
+      - run: pytest tests/ -v --tb=short
+
+      - name: Trigger grader
+        if: always()
+        run: |
+          curl -s -X POST https://grader-webhook.dmpetrocelli.workers.dev/grade \
+            -H "Content-Type: application/json" \
+            -d '{"fork":"${{ github.repository }}","sha":"${{ github.sha }}","exercise":"exercise-09-leader-election"}'
