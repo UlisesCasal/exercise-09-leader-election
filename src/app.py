@@ -132,6 +132,7 @@ def receive_coordinator(body: CoordinatorAnnouncement):
     return {"status": "ok"}
 
 
+@app.get("/leader")
 @app.get("/api/leader")
 def get_leader():
     leader = election.get_leader()
